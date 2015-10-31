@@ -11,6 +11,7 @@ while true
 do
 date "+%F %T.%N" >> $FILE
     #
-    top -H -t 100 >> $FILE
+    #top -H -t 100 >> $FILE
+    top -H  >> $FILE
 sleep 10
 done

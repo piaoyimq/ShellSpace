@@ -15,6 +15,7 @@ date "+%F %T.%N" >> $FILE
     # -d n  Number iterations 
     # n     Number of lines (processes)
     #
-    top -b -S -d 1 100 >> $FILE
+    #top -b -S -d 1 100 >> $FILE
+    top -b -S -d 1  >> $FILE
 sleep 30
 done
