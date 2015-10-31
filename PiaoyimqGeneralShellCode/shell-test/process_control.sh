@@ -4,7 +4,7 @@ PROCESS_NAME="msgdbgate"
 LOG_FILE="run.log"
 PID_FILE="$PROCESS_NAME.pid"
 
-BASE_DIR=""
+BASE_DIR="/root/workspace/ShellSpace/PiaoyimqGeneralShellCode/"
 RUN_DIR=""
 LIB_DIR=""
 
@@ -13,14 +13,15 @@ function timeStamp(){
     date +'%Y/%m/%d %H:%M:%S'
 }
 
-function logMessage(){
-    echo $(timeStamp) $@    
+function logMessage(){ echo $(timeStamp) $@    
     echo $(timeStamp) $@>>$RUN_DIR/$LOG_FILE
 }
 
 
 function setEnv(){
-  if [ -z "$BASE_DIR" ] ; then    
+#	logMessage "dir0: $BASE_DIR"
+  if [ -z "$BASE_DIR" ] ; then   #if BASE_DIR was not configured ,run this 
+#	logMessage "dir: $BASE_DIR"
       PRG="$0"
     while [ -h "$PRG" ] ; do
         ls=`ls -ld "$PRG"`
@@ -30,14 +31,16 @@ function setEnv(){
         else
           PRG="`dirname "$PRG"`/$link"
         fi
-      done
+	done
       BASE_DIR=`dirname "$PRG"`/..
       BASE_DIR=`cd "$BASE_DIR" && pwd`
+   #logMessage "setEnv...1"
    fi
    RUN_DIR=$BASE_DIR/bin/run
    BIN_DIR=$BASE_DIR/bin
    LIB_DIR=$BASE_DIR/lib
    mkdir -p  $RUN_DIR    
+   #logMessage "setEnv...2"
 }
 
 
@@ -175,12 +178,12 @@ function getOpts(){
 }
 
 function main(){
-    logMessage "-------->  begin <-------------"
+    #logMessage "-------->  begin <-------------"
     setEnv $@
-    logMessage "BASE_DIR:$BASE_DIR"    
+    #logMessage "BASE_DIR:$BASE_DIR"    
     getOpts $@
-    logMessage "-------->  end "
+    #logMessage "-------->  end "
 
 }
 
-main
+main $@
