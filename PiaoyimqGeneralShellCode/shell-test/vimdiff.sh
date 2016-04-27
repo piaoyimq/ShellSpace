@@ -27,7 +27,7 @@ else
         done
         echo -en "\033[32mInput file number: \033[0m"
         read variable
-        if expr $variable + 0 &>/dev/null && [ $variable -ge 0 ] && [ $variable -lt $length ]
+        if grep '^[[:digit:]]*$' <<< $variable && [ $variable -ge 0 ] && [ $variable -lt $length ]
         then
             if [ -f "$1/${array[$variable]:2}" ]
             then

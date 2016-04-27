@@ -28,5 +28,5 @@ then
 else
     cd $BIN_PATH
     ln -s $BASE_PATH/ShellSpace/PiaoyimqGeneralShellCode/shell-test/vim.sh vim.sh 
-    ln -s $BASE_PATH/ShellSpace/PiaoyimqGeneralShellCode/shell-test/vimdiff.sh vimdiffsh 
+    ln -s $BASE_PATH/ShellSpace/PiaoyimqGeneralShellCode/shell-test/vimdiff.sh vimdiff.sh 
 fi 
