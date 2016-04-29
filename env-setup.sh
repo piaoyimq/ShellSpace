@@ -23,12 +23,12 @@ if [ ! -d $BIN_PATH ]
 then
     mkdir $BIN_PATH 
     cd $BIN_PATH
-    ln -s $BASE_PATH/ShellSpace/PiaoyimqGeneralShellCode/shell-test/vim.sh vim.sh 
-    ln -s $BASE_PATH/ShellSpace/PiaoyimqGeneralShellCode/shell-test/vimdiff.sh vimdiff.sh 
-    ln -s $BASE_PATH/ShellSpace/tools/du.sh du.sh
+    ln -s $BASE_PATH/ShellSpace/tools/shell-command/vim.sh vim.sh 
+    ln -s $BASE_PATH/ShellSpace/tools/shell-command/vimdiff.sh vimdiff.sh 
+    ln -s $BASE_PATH/ShellSpace/tools/shell-command/du.sh du.sh 
 else
     cd $BIN_PATH
-    ln -s $BASE_PATH/ShellSpace/PiaoyimqGeneralShellCode/shell-test/vim.sh vim.sh 
-    ln -s $BASE_PATH/ShellSpace/PiaoyimqGeneralShellCode/shell-test/vimdiff.sh vimdiff.sh 
-    ln -s $BASE_PATH/ShellSpace/tools/du.sh du.sh
+    ln -s $BASE_PATH/ShellSpace/tools/shell-command/vim.sh vim.sh 
+    ln -s $BASE_PATH/ShellSpace/tools/shell-command/vimdiff.sh vimdiff.sh 
+    ln -s $BASE_PATH/ShellSpace/tools/shell-command/du.sh du.sh 
 fi 
