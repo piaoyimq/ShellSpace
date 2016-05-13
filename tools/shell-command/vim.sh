@@ -11,6 +11,7 @@ else
     if [ $length -eq 1 ]
     then
         vim ${array[0]}
+        echo ${array[0]}
     else
         for ((i=0; i<$length; i++))
         do
