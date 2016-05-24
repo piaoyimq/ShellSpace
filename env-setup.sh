@@ -8,6 +8,19 @@ BIN_PATH=$HOME/bin
 
 #set -x
 
+add_string_in_file()
+{
+#$1 is keyword
+#$2 is filename
+#$3 is added string 
+    result=$(grep "$1" $2) 
+    if [ -z "$result" ]
+    then
+	    echo "$3" >> $2
+    fi
+
+}
+
 ##############git config
 hist_command="[alias]
 	hist = log --graph --pretty=format:'%Cred%h%Creset %s -%C(yellow)%d%Creset% Cgreen[%an]%Creset %Cgreen(%cr)%Creset' --abbrev-commit --date=relative"
@@ -17,19 +30,14 @@ length=${#git_config[@]}
 
 for ((i=0; i<$length; i++))
 do
-    result=$(grep "${git_config[$i]}" .git/config) 
-if [ -z "$result" ]
-then
-    #echo -e "\033[31m$i\033[0m" : ${git_config[$i]} #debug
-   case ${git_config[$i]} in
-       hist )
-	    echo "$hist_command" >> .git/config ;;
-
-       test )
-          echo #"test" ;;
-   esac
-fi
-
+    case ${git_config[$i]} in
+           hist )
+            add_string_in_file "${git_config[$i]}" ".git/config" "$hist_command";;
+    
+           test )
+            #add_string_in_file "${git_config[$i]}" .git/config $hist_command;;
+              echo #"test" ;;
+       esac
 done
  
 git config --global color.status auto
@@ -49,3 +57,7 @@ ln -fs $BASE_PATH/ShellSpace/tools/shell-command/vim.sh vim.sh
 ln -fs $BASE_PATH/ShellSpace/tools/shell-command/vimdiff.sh vimdiff.sh 
 ln -fs $BASE_PATH/ShellSpace/tools/shell-command/du.sh du.sh 
 ln -fs $BASE_PATH/ShellSpace/tools/shell-command/sed.sh sed.sh
+path_content="export PATH=$BASE_PATH/CppSpace/output/Linux_x86/bin/:\$PATH"
+
+add_string_in_file "CppSpace/output" "$HOME/.bashrc" "$path_content"
+bash $HOME/.bashrc
