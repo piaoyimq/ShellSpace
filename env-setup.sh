@@ -4,6 +4,7 @@
 
 
 BASE_PATH=$(cd $(cd "$(dirname "$0")"; pwd)/..; pwd)
+CODE_PATH=$(pwd)
 BIN_PATH=$HOME/bin
 
 #set -x
@@ -36,7 +37,7 @@ do
     
            test )
             #add_string_in_file "${git_config[$i]}" .git/config $hist_command;;
-              echo #"test" ;;
+              : #do nothing
        esac
 done
  
@@ -47,17 +48,33 @@ git config --global color.add auto
 
 #shell
 
-if [ ! -d $BIN_PATH ] 
-then
-    mkdir $BIN_PATH 
-fi
+mk_symbolink()
+{
+    
+    if [ ! -d $BIN_PATH ] 
+    then
+        mkdir $BIN_PATH 
+    fi
+    
+    cd $BIN_PATH
+    ln -snf $BASE_PATH/ShellSpace/tools/shell-command/vim.sh vim.sh 
+    ln -snf $BASE_PATH/ShellSpace/tools/shell-command/vimdiff.sh vimdiff.sh 
+    ln -snf $BASE_PATH/ShellSpace/tools/shell-command/du.sh du.sh 
+    ln -snf $BASE_PATH/ShellSpace/tools/shell-command/sed.sh sed.sh
+    export PATH=$BASE_PATH/CppSpace/output/Linux_x86/bin/:$PATH
+    cd $CODE_PATH
+}
 
-cd $BIN_PATH
-ln -fs $BASE_PATH/ShellSpace/tools/shell-command/vim.sh vim.sh 
-ln -fs $BASE_PATH/ShellSpace/tools/shell-command/vimdiff.sh vimdiff.sh 
-ln -fs $BASE_PATH/ShellSpace/tools/shell-command/du.sh du.sh 
-ln -fs $BASE_PATH/ShellSpace/tools/shell-command/sed.sh sed.sh
-path_content="export PATH=$BASE_PATH/CppSpace/output/Linux_x86/bin/:\$PATH"
 
-add_string_in_file "CppSpace/output" "$HOME/.bashrc" "$path_content"
-bash $HOME/.bashrc
+main ()
+{
+    echo "Initial workspace..."
+
+    mk_symbolink
+
+    export PATH=$(awk -F: '{for(i=1;i<=NF;i++){if(!($i in a)){a[$i];printf s$i;s=":"}}}'<<<$PATH) # Remove duplicates
+
+    exec ${SHELL-tcsh} # Take over this shell process
+}
+
+main "$@"
