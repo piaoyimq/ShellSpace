@@ -3,11 +3,16 @@
 #
 
 
-BASE_PATH=$(cd $(cd "$(dirname "$0")"; pwd)/..; pwd)
 CODE_PATH=$(pwd)
 BIN_PATH=$HOME/bin
 
 #set -x
+# Exit with error, $1 exit code (/usr/include/sysexits.h), $2 text output
+err_exit()
+{
+	echo -e "Error: $2\nAborting..." >&2
+	exit $1
+}
 
 add_string_in_file()
 {
@@ -61,17 +66,20 @@ mk_symbolink()
     ln -snf $BASE_PATH/ShellSpace/tools/shell-command/vimdiff.sh vimdiff.sh 
     ln -snf $BASE_PATH/ShellSpace/tools/shell-command/du.sh du.sh 
     ln -snf $BASE_PATH/ShellSpace/tools/shell-command/sed.sh sed.sh
-    export PATH=$BASE_PATH/CppSpace/output/Linux_x86/bin/:$PATH
+    PATH=$BASE_PATH/CppSpace/output/Linux_x86/bin/:$PATH
     cd $CODE_PATH
 }
 
 
 main ()
 {
+
+    [ -z "$BASE_PATH" ] || err_exit 73 "Please exit your current git workspace before setting up new!" 
+    export BASE_PATH=$(cd $(cd "$(dirname "$0")"; pwd)/..; pwd)
     echo "Initial workspace..."
 
     mk_symbolink
-
+    PATH=$BASE_PATH/CppSpace/tools/bin:$PATH 
     export PATH=$(awk -F: '{for(i=1;i<=NF;i++){if(!($i in a)){a[$i];printf s$i;s=":"}}}'<<<$PATH) # Remove duplicates
 
     exec ${SHELL-tcsh} # Take over this shell process
