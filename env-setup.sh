@@ -79,7 +79,7 @@ main ()
     echo "Initial workspace..."
 
     mk_symbolink
-    PATH=$BASE_PATH/CppSpace/tools/bin:$PATH 
+    PATH=$BASE_PATH/CppSpace/tools/bin:$BIN_PATH/compile:$PATH 
     export PATH=$(awk -F: '{for(i=1;i<=NF;i++){if(!($i in a)){a[$i];printf s$i;s=":"}}}'<<<$PATH) # Remove duplicates
 
     exec ${SHELL-tcsh} # Take over this shell process
