@@ -66,6 +66,8 @@ mk_symbolink()
     ln -snf $BASE_PATH/ShellSpace/tools/shell-command/vimdiff.sh vimdiff.sh 
     ln -snf $BASE_PATH/ShellSpace/tools/shell-command/du.sh du.sh 
     ln -snf $BASE_PATH/ShellSpace/tools/shell-command/sed.sh sed.sh
+    ln -snf $BASE_PATH/ShellSpace/tools/shell-command/backup.sh backup.sh
+    ln -snf $BASE_PATH/ShellSpace/tools/shell-command/scp.sh scp.sh
     PATH=$BASE_PATH/CppSpace/output/Linux_x86/bin/:$PATH
     cd $CODE_PATH
 }
