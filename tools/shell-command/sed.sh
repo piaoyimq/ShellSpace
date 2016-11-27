@@ -8,4 +8,4 @@ fi
 
 
 set -x
-sed -i "s/$2/$3/g" `grep "$2" $1 -rl`
+sed -i "s/$2/$3/g" `grep -w "$2" $1 -rl`
