@@ -7,7 +7,18 @@ spawn scp erv@$ip:/md/loggd_persistent.log* .
 expect "*password:" 
 
 send "ggsn\r"
-expect eof 
+#expect eof 
 
-exec sh -c {gunzip *.gz}
+#exec sh -c {gunzip *.gz}
 
+spawn scp root@$ip:/md/services/epg/fm/alarm-history .
+expect "*password:"
+send "root\r"
+expect eof
+
+exec sh -c {
+if [ -f *.gz ]
+then
+    gunzip *.gz
+fi
+}
