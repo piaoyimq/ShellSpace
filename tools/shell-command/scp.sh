@@ -4,20 +4,23 @@
 PWD=`pwd`
 basedirname=`basename $PWD`
 dst_dir=`pwd`
+    echo -n ""
 if [ "$basedirname" == $1 ]
 then
+    echo -n ""
     echo "parent is $1"
 else
-    echo "parent is not $1"
+#    echo "parent is not $1"
 
     if [ ! -d $1 ]
     then
         mkdir $1
     else
-        echo "current is $1"
+        echo -n ""
+#        echo "current is $1"
     fi
     dst_dir=$dst_dir/$1
-    echo "new path: $dst_dir"
+#    echo "new path: $dst_dir"
 fi
 
 copy()
