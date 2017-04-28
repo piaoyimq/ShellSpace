@@ -11,14 +11,14 @@ send "ggsn\r"
 
 #exec sh -c {gunzip *.gz}
 
-spawn scp root@$ip:/md/services/epg/fm/alarm-history .
+spawn scp erv@$ip:/md/services/epg/fm/alarm-history .
 expect "*password:"
-send "root\r"
+send "ggsn\r"
 expect eof
 
-exec sh -c {
-if [ -f *.gz ]
-then
-    gunzip *.gz
-fi
-}
+#exec sh -c {
+#if [ -f *.gz ]
+#then
+#    gunzip *.gz
+#fi
+#}

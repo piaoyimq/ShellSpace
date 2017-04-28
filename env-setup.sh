@@ -48,6 +48,9 @@ done
  
 git config --global color.status auto
 git config --global color.add auto
+#git config --global color.diff auto
+#git config --global user.name "piaoyimq"
+#git config --global user.email piaoyimq@qq.com
 
 ############git mergetool vimdiff config:http://www.cnblogs.com/yaozhongxiao/p/3869862.html
 
@@ -68,6 +71,7 @@ mk_symbolink()
     ln -snf $BASE_PATH/ShellSpace/tools/shell-command/sed.sh sed.sh
     ln -snf $BASE_PATH/ShellSpace/tools/shell-command/backup.sh backup.sh
     ln -snf $BASE_PATH/ShellSpace/tools/shell-command/scp.sh scp.sh
+    ln -snf $BASE_PATH/ShellSpace/tools/shell-command/cat.sh cat.sh
     PATH=$BASE_PATH/CppSpace/output/Linux_x86/bin/:$PATH
     cd $CODE_PATH
 }
