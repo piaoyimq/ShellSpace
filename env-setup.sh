@@ -3,7 +3,7 @@
 #
 
 
-CODE_PATH=$(pwd)
+WS_ROOT=$(pwd)
 BIN_PATH=$HOME/bin
 
 #set -x
@@ -73,7 +73,7 @@ mk_symbolink()
     ln -snf $BASE_PATH/ShellSpace/tools/shell-command/scp.sh scp.sh
     ln -snf $BASE_PATH/ShellSpace/tools/shell-command/cat.sh cat.sh
     PATH=$BASE_PATH/CppSpace/output/Linux_x86/bin/:$PATH
-    cd $CODE_PATH
+    cd $WS_ROOT
 }
 
 
@@ -82,13 +82,16 @@ main ()
 
     [ -z "$BASE_PATH" ] || err_exit 73 "Please exit your current git workspace before setting up new!" 
     export BASE_PATH=$(cd $(cd "$(dirname "$0")"; pwd)/..; pwd)
+    export WS_ROOT
     echo "Initial workspace..."
 
     mk_symbolink
     PATH=$BASE_PATH/CppSpace/tools/bin:$BIN_PATH/compile:$PATH 
     export PATH=$(awk -F: '{for(i=1;i<=NF;i++){if(!($i in a)){a[$i];printf s$i;s=":"}}}'<<<$PATH) # Remove duplicates
 
-    exec ${SHELL-tcsh} # Take over this shell process
+    #exec ${SHELL-tcsh} # Take over this shell process
+    exec /bin/tcsh # Take over this shell process
+    #exec /bin/bash # Take over this shell process
 }
 
 main "$@"
