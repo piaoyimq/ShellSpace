@@ -1,0 +1,125 @@
+#!/bin/bash
+
+arc_path=`dirname $(readlink ${HOME}/.afs/${PROJ_NR}/pbin) 2>/dev/null`
+arc_path=${arc_path:-/env/PC}
+
+# Get remote Git repository URL
+remote_url="$(git ls-remote --get-url 2>/dev/null)"
+
+# Check for repository specific setup
+if [[ -f ${arc_path}/templates/repo_setup/repo-specific-setup && -n "$remote_url" ]]; then
+   remote_url_base=`basename ${remote_url}`
+   remote_url_base=`echo "${remote_url_base%.git}"`
+   remote_repo_name=`cat ${arc_path}/templates/repo_setup/repo-specific-setup | grep "^${remote_url_base} " | cut -d' ' -f 2`
+fi
+
+# No repository specific setup found
+if [[ -z "${remote_repo_name}" ]]; then
+   # Find out if remote is a PDU-PC repository
+   if [[ "${remote_url}" =~ .*/pc/.*/.* || "${remote_url}" =~ .*/cims/.* ]]; then
+      # PDU-PC repository
+      remote_repo_name="pc"
+   else
+      # Non-PDU-PC repository
+      remote_repo_name=""
+   fi
+fi
+
+# Check remote Git repository name
+if [ -n "${remote_repo_name}" ]; then
+   #
+   # Check for repository specific Git configuration
+   # (controlled by Git variable scmclone.includepath)
+   #
+   scm_include_path=`git config scmclone.includepath`
+   if [[ "${scm_include_path}" = "true" ]]; then
+      git_config_path=${remote_repo_name}
+      # Loop and check for repository specific Git configuration under $ArcPath/templates/repo_setup
+      # Set local Git variable: include.path
+      while [[ "${git_config_path}" != "." ]]; do
+         if [[ -f "${arc_path}/templates/repo_setup/${git_config_path}/gitconfig" ]]; then
+            # Set repository specific Git configuration
+            git config --local include.path ${arc_path}/templates/repo_setup/${git_config_path}/gitconfig
+            break
+         else
+            # Check parent directory for repository specific Git configuration
+            git_config_path=`dirname ${git_config_path}`
+         fi
+      done
+   fi
+
+   #
+   # Check for repository specific Git template directory
+   # (controlled by Git variable scmclone.inittemplatedir)
+   #
+   scm_init_template_dir=`git config scmclone.inittemplatedir`
+   if [[ "${scm_init_template_dir}" = "true" ]]; then
+      template_dir_path=${remote_repo_name}
+      while true; do
+         # Loop and check for repository specific Git template directory under $ArcPath/templates/repo_setup
+         # Set local Git variable: init.templatedir
+         while [[ "${template_dir_path}" != "pc" && "${template_dir_path}" != "cims" ]]; do
+            # Not a PDU-PC Git repository
+            if [[ ${template_dir_path} == "." ]]; then
+               # Set Git default template directory
+               git config --local init.templatedir /usr/share/git-core/templates
+               break 2
+            fi
+
+            # Find out if repository has specific Git template directory
+            if [[ -d "${arc_path}/templates/repo_setup/${template_dir_path}/templates/" ]]; then
+               # Set repository specific Git template directory
+               git config --local init.templatedir ${arc_path}/templates/repo_setup/${template_dir_path}/templates
+               break 2
+            else
+               # Check parent directory for repository specific Git template directory
+               template_dir_path=`dirname ${template_dir_path}`
+            fi
+         done
+
+         # Set default PDU-PC Git template directory
+         git config --local init.templatedir ${arc_path}/templates/repo_setup/pc/templates
+         break
+      done
+   fi
+
+   #
+   # Checking repository specific Git commit template
+   # (controlled by Git variable scmclone.committemplate)
+   #
+   scm_commit_template=`git config scmclone.committemplate`
+   if [[ "${scm_commit_template}" = "true" ]]; then
+      commit_template_path=${remote_repo_name}
+      # Loop and check for repository specific Git commit template under $ArcPath/templates/repo_setup
+      # Set local Git variable: commit.template
+      while true; do
+         while [[ "${commit_template_path}" != "pc" && "${commit_template_path}" != "cims" ]]; do
+            if [[ -f "${arc_path}/templates/repo_setup/${commit_template_path}/prepare-commit.txt" ]]; then
+               # Set repository specific Git commit template
+               git config --local commit.template ${arc_path}/templates/repo_setup/${commit_template_path}/prepare-commit.txt
+               break 2
+            else
+               # Check parent directory for repository specific Git commit template
+               commit_template_path=`dirname ${commit_template_path}`
+            fi
+         done
+
+         # Set default PDU-PC Git commit template
+         git config --local commit.template ${arc_path}/templates/repo_setup/pc/prepare-commit.txt
+         break
+      done
+   fi
+else
+   # Set Git default template directory
+   git config --local init.templatedir /usr/share/git-core/templates
+fi
+
+# Remove myself
+unlink $0
+
+# Deploy hooks according to Git config variable 'init.templatedir'
+git init
+
+# Workaround for submodule fault 'core.bare and core.worktree do not make sense'
+git -c core.bare=false config --unset core.bare 2>/dev/null
+git config --bool core.bare false

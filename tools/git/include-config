@@ -1,0 +1,58 @@
+# Purpose of this file is to setup basic Git environment.
+#
+# Include this config file at the top of your ~/.gitconfig.
+# Override config settings in this config file by adding changes into your ~/.gitconfig
+
+# URLs
+[url "ssh://selngerrit-mirror.mo.sw.piaoyimq.se:29418/"]
+	insteadOf = selngerrit:
+[url "ssh://selngerrit.mo.sw.piaoyimq.se:29418/"]
+	pushInsteadOf = selngerrit:
+[url "ssh://gerritmirror-ha.rnd.ki.sw.piaoyimq.se:29418/"]
+	insteadOf = gerritcentral:
+[url "ssh://gerrit.piaoyimq.se:29418/"]
+	pushInsteadOf = gerritcentral:
+# Others
+[init]
+	templatedir = ~/workspace/ShellSpace/tools/git/templatedir/install
+[core]
+	preloadindex = true
+[color]
+	ui = auto
+
+# Diff & Merge
+[merge]
+	tool = kdiff3
+[diff]
+	renames = true
+[mergetool]
+	prompt = no
+
+# Hooks
+[submodules]
+	autoupdate = true
+
+# Rhapsody
+[merge "rhp"]
+	name = rhapsody diffmerge
+	driver = rhp-merge %O %A %B %A
+	recursive = binary
+[diff "rhp"]
+	driver = text
+[mergetool "rhp"]
+	cmd = rhp-mergetool $BASE $LOCAL $REMOTE $MERGED
+[difftool "rhp"]
+	cmd = rhp-difftool $LOCAL $REMOTE $MERGED
+
+# SCM check
+[scmcheck]
+	pcgitsetupcheck = true
+	pchookscheck = true
+	includepath = true
+	inittemplatedir = true
+	committemplate = true
+
+[scmclone]
+	includepath = true
+	inittemplatedir = true
+	committemplate = true

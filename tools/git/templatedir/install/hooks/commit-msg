@@ -1,0 +1,11 @@
+#!/bin/sh
+
+path_n=`dirname $0`
+s_name=`basename $0`
+
+hooks=$path_n/${s_name}_*
+for hook in $hooks; do
+   if [ -x "$hook" ]; then
+      "$hook" "$@"
+   fi
+done
