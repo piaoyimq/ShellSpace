@@ -29,8 +29,7 @@ add_string_in_file()
 
 ##############git config
 hist_command="[alias]
-	hist = log --graph --pretty=format:'%Cred%h%Creset %s -%C(yellow)%d%Creset% Cgreen[%an]%Creset %Cgreen(%cr)%Creset' --abbrev-commit --date=relative"
-
+    hist = log --graph --format=format:\\\"%C(red)%h%C(reset) %C(yellow)%ad%C(reset) | %s %C(green)\\\\[%an\\\\]%C(reset)%C(bold blue)%d%C(reset)\\\" --abbrev-commit --date=short"
 git_config=("hist" "test")
 length=${#git_config[@]}
 

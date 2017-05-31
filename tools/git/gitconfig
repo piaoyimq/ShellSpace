@@ -1,0 +1,50 @@
+[user]
+	name = Weibo Zhu
+	email = weibo.zhu@ericsson.com
+[core]
+  editor = vim
+	preloadindex = true
+[url "ssh://gerritmirror.mo.sw.ericsson.se:29418/"]
+	insteadOf = gerritcentral:
+[merge "rhp"]
+	name = rhapsody diffmerge
+	driver = rhp-merge %O %A %B %A
+	recursive = binary
+[submodules]
+	autoupdate = true
+[merge]
+	tool = rhp
+[color]
+	ui = auto
+[commit]
+	template = /env/PC/templates/commit/prepare-commit.txt
+[alias]
+	co = checkout
+	br = branch
+	hist = log --graph --format=format:\"%C(red)%h%C(reset) %C(yellow)%ad%C(reset) | %s %C(green)\\[%an\\]%C(reset)%C(bold blue)%d%C(reset)\" --abbrev-commit --date=short
+	alias = !git config --global --list | grep ^alias
+	st = status
+	root = rev-parse --show-toplevel
+	ci = commit
+	head = rev-list -n1 --abbrev-commit HEAD
+[color "branch"]
+	upstream = magenta
+[mergetool "rhp"]
+	cmd = rhp-mergetool $BASE $LOCAL $REMOTE $MERGED
+[url "ssh://selngerrit-mirror.mo.sw.ericsson.se:29418/"]
+	insteadOf = selngerrit:
+[init]
+	templatedir = /env/PC/templates/links
+[diff]
+	renames = true
+	guitool = rhp
+[url "ssh://gerrit.ericsson.se:29418/"]
+	pushInsteadOf = gerritcentral:
+[difftool "rhp"]
+	cmd = rhp-difftool $LOCAL $REMOTE $MERGED
+[mergetool]
+	prompt = no
+[url "ssh://selngerrit.mo.sw.ericsson.se:29418/"]
+	pushInsteadOf = selngerrit:
+[diff "rhp"]
+	driver = text
