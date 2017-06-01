@@ -30,10 +30,7 @@ add_string_in_file()
 ##############git config
 git_config()
 {
-   if [ ! -f ~/.gitconfig ] 
-   then
-       cp $BASE_PATH/ShellSpace/tools/git/.gitconfig ~/
-   fi
+    $BASE_PATH/ShellSpace/tools/shell-command/safe-copy.sh  $BASE_PATH/ShellSpace/tools/git/gitconfig ~/.gitconfig
 }
 
 #shell
@@ -58,6 +55,16 @@ mk_symbolink()
     cd $WS_ROOT
 }
 
+########bash Initial
+bash_init()
+{
+    $BASE_PATH/ShellSpace/tools/shell-command/safe-copy.sh  $BASE_PATH/ShellSpace/tools/bash-init.sh ~/.bash-init.sh
+    add_string_in_file bash-init.sh ~/.bashrc "source ~/.bash-init.sh"
+}
+
+
+
+
 
 main ()
 {
@@ -69,12 +76,14 @@ main ()
 
     git_config
     mk_symbolink
+    bash_init
     PATH=$BASE_PATH/CppSpace/tools/bin:$BIN_PATH/compile:$PATH 
     export PATH=$(awk -F: '{for(i=1;i<=NF;i++){if(!($i in a)){a[$i];printf s$i;s=":"}}}'<<<$PATH) # Remove duplicates
 
-    exec ${SHELL-tcsh} # Take over this shell process
+    exec bash # Take over this shell process
     #exec /bin/tcsh # Take over this shell process
-    #exec /bin/bash # Take over this shell process
+    #exec tcsh # Take over this shell process
+    #exec zsh
 }
 
 main "$@"
