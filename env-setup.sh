@@ -77,7 +77,7 @@ main ()
     git_config
     mk_symbolink
     bash_init
-    PATH=$BASE_PATH/CppSpace/tools/bin:$BIN_PATH/compile:$PATH 
+    PATH=$BASE_PATH/CppSpace/tools/bin:$BIN_PATH:$BIN_PATH/compile:$PATH 
     export PATH=$(awk -F: '{for(i=1;i<=NF;i++){if(!($i in a)){a[$i];printf s$i;s=":"}}}'<<<$PATH) # Remove duplicates
 
     exec bash # Take over this shell process
