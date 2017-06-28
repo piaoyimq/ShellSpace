@@ -20,6 +20,7 @@ safe_copy()
        ret=`diff $1 $2`
        if [ -n "$ret" ]
        then
+           cp $2 $2-old
            cp -i $1 $2
        fi
    fi
