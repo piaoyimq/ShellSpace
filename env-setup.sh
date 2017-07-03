@@ -6,7 +6,6 @@
 WS_ROOT=$(pwd)
 BIN_PATH=$HOME/bin
 
-#set -x
 # Exit with error, $1 exit code (/usr/include/sysexits.h), $2 text output
 err_exit()
 {
@@ -26,6 +25,14 @@ add_string_in_file()
     fi
 
 }
+
+
+cpp_env()
+{
+    export AUTOMOCK_GCC_ROOT="/proj/epg-tools/compilers/gcc4.8.5-rhel6.6-binutils2.24.gold"
+    export AUTOMOCK_GCC_PREFIX="/proj/epg-tools/compilers/gcc4.8.5-rhel6.6-binutils2.24.gold/bin/"
+}
+
 
 ##############git config
 git_config()
@@ -78,6 +85,7 @@ main ()
     git_config
     mk_symbolink
     bash_init
+    cpp_env
     PATH=$BASE_PATH/CppSpace/tools/bin:$BIN_PATH:$BIN_PATH/compile:$PATH 
     export PATH=$(awk -F: '{for(i=1;i<=NF;i++){if(!($i in a)){a[$i];printf s$i;s=":"}}}'<<<$PATH) # Remove duplicates
 
