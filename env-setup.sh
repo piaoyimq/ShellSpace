@@ -29,8 +29,8 @@ add_string_in_file()
 
 cpp_env()
 {
-    export AUTOMOCK_GCC_ROOT="/proj/epg-tools/compilers/gcc4.8.5-rhel6.6-binutils2.24.gold"
-    export AUTOMOCK_GCC_PREFIX="/proj/epg-tools/compilers/gcc4.8.5-rhel6.6-binutils2.24.gold/bin/"
+    export AUTOMOCK_GCC_ROOT="/compilers/gcc4.8.5-rhel6.6-binutils2.24.gold"
+    export AUTOMOCK_GCC_PREFIX="/compilers/gcc4.8.5-rhel6.6-binutils2.24.gold/bin/"
 }
 
 
