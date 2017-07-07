@@ -1,5 +1,8 @@
 alias duc='du --max-depth=1 --all -h'
 alias ws='cd $WS_ROOT'
+alias j='jobs'
+alias f='fg'
+alias b='bg'
 
 # enable color support of ls and also add handy aliases
 if [ -x /usr/bin/dircolors ]; then
