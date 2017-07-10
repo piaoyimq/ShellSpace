@@ -50,16 +50,7 @@ mk_symbolink()
         mkdir $BIN_PATH 
     fi
     
-    cd $BIN_PATH
-    ln -snf $BASE_PATH/ShellSpace/tools/shell-command/vim.sh vim.sh 
-    ln -snf $BASE_PATH/ShellSpace/tools/shell-command/vimdiff.sh vimdiff.sh 
-    ln -snf $BASE_PATH/ShellSpace/tools/shell-command/du.sh du.sh 
-    ln -snf $BASE_PATH/ShellSpace/tools/shell-command/sed.sh sed.sh
-    ln -snf $BASE_PATH/ShellSpace/tools/shell-command/backup.sh backup.sh
-    ln -snf $BASE_PATH/ShellSpace/tools/shell-command/scp.sh scp.sh
-    ln -snf $BASE_PATH/ShellSpace/tools/shell-command/cat.sh cat.sh
-    PATH=$BASE_PATH/CppSpace/output/Linux_x86/bin/:$PATH
-    cd $WS_ROOT
+    cp -fLrs $BASE_PATH/ShellSpace/tools/shell-command/* $BIN_PATH
 }
 
 ########bash Initial
