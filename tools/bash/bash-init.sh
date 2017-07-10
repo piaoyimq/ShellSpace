@@ -27,6 +27,7 @@ shopt -s checkwinsize
 # match all files and zero or more directories and subdirectories.
 #shopt -s globstar
 
+
 # make less more friendly for non-text input files, see lesspipe(1)
 [ -x /usr/bin/lesspipe ] && eval "$(SHELL=/bin/sh lesspipe)"
 
@@ -128,3 +129,7 @@ normal=$'\[\e[m\]'
 PROMPT_COMMAND="find_git_branch; $PROMPT_COMMAND"
 PS1="$cyan\W$yellow\$git_branch$white \$ $normal"
 #PS1="$white[$magenta\u$white@$green\h$white:$cyan\w$yellow\$git_branch$white]\$ $normal"
+
+[ ! -d ~/bin ] && mkdir ~/bin
+PATH=~/bin:$PATH
+

@@ -44,12 +44,10 @@ git_config()
 
 mk_symbolink()
 {
-    
     if [ ! -d $BIN_PATH ] 
     then
         mkdir $BIN_PATH 
     fi
-    
     cp -fLrs $BASE_PATH/ShellSpace/tools/shell-command/* $BIN_PATH
 }
 
@@ -74,10 +72,10 @@ main ()
     echo "Initial workspace..."
 
     git_config
-    mk_symbolink
     bash_init
+    mk_symbolink
     cpp_env
-    PATH=$BASE_PATH/CppSpace/tools/bin:$BIN_PATH:$BIN_PATH/compile:$PATH 
+    PATH=$BASE_PATH/CppSpace/tools/bin:$BIN_PATH/compile:$PATH 
     export PATH=$(awk -F: '{for(i=1;i<=NF;i++){if(!($i in a)){a[$i];printf s$i;s=":"}}}'<<<$PATH) # Remove duplicates
 
     exec bash # Take over this shell process
