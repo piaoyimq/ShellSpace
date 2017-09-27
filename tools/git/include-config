@@ -24,26 +24,30 @@
 [merge]
 	tool = kdiff3
 [diff]
-	renames = true
-[mergetool]
-	prompt = no
+	tool = kdiff3
+[difftool "kdiff3"]	
+	cmd = 'C:/Program Files/KDiff3/kdiff3.exe' "$LOCAL" "$REMOTE"
+[mergetool "kdiff3"] 
+#	prompt = no
+	cmd = 'C:/Program Files/KDiff3/kdiff3.exe' "$BASE" "$LOCAL" "$REMOTE" -o "$MERGED"
+	 trustExitCode = true
 
 # Hooks
 [submodules]
 	autoupdate = true
 
 # Rhapsody
-[merge "rhp"]
-	name = rhapsody diffmerge
-	driver = rhp-merge %O %A %B %A
-	recursive = binary
-[diff "rhp"]
-	driver = text
-[mergetool "rhp"]
-	cmd = rhp-mergetool $BASE $LOCAL $REMOTE $MERGED
-[difftool "rhp"]
-	cmd = rhp-difftool $LOCAL $REMOTE $MERGED
-
+##[merge "rhp"]
+#	name = rhapsody diffmerge
+#	driver = rhp-merge %O %A %B %A
+#	recursive = binary
+#[diff "rhp"]
+#	driver = text
+#[mergetool "rhp"]
+#	cmd = rhp-mergetool $BASE $LOCAL $REMOTE $MERGED
+#[difftool "rhp"]
+#	cmd = rhp-difftool $LOCAL $REMOTE $MERGED
+#
 # SCM check
 [scmcheck]
 	pcgitsetupcheck = true
