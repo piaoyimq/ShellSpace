@@ -29,9 +29,10 @@ copy()
 
 spawn scp erv@$1:/md/loggd_* $2
 
-expect "*password:" 
-
-send "ggsn\r"
+expect {
+ "*password:" {send "ggsn\r";}
+ "*(yes/no)?" { send "yes\r"; exp_continue}
+}
 expect eof 
 
 
