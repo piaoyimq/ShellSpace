@@ -26,10 +26,10 @@
 [diff]
 	tool = kdiff3
 [difftool "kdiff3"]	
-	cmd = 'C:/Program Files/KDiff3/kdiff3.exe' "$LOCAL" "$REMOTE"
+	cmd = '/home/azhweib/my-software/kdiff3/kdiff3' "$LOCAL" "$REMOTE"
 [mergetool "kdiff3"] 
 #	prompt = no
-	cmd = 'C:/Program Files/KDiff3/kdiff3.exe' "$BASE" "$LOCAL" "$REMOTE" -o "$MERGED"
+	cmd = '/home/azhweib/my-software/kdiff3/kdiff3' "$BASE" "$LOCAL" "$REMOTE" -o "$MERGED"
 	 trustExitCode = true
 
 # Hooks
