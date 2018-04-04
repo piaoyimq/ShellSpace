@@ -3,6 +3,7 @@ alias ws='cd $WS_ROOT'
 alias j='jobs'
 alias f='fg'
 alias b='bg'
+alias less='less -N'
 
 # enable color support of ls and also add handy aliases
 if [ -x /usr/bin/dircolors ]; then
