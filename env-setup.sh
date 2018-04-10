@@ -56,6 +56,7 @@ bash_init()
 {
     $BASE_PATH/ShellSpace/tools/shell-command/safe-copy.sh  $BASE_PATH/ShellSpace/tools/bash/bash-init.sh ~/.bash-init.sh
     $BASE_PATH/ShellSpace/tools/shell-command/safe-copy.sh  $BASE_PATH/ShellSpace/tools/bash/bash-aliases ~/.bash-aliases
+    $BASE_PATH/ShellSpace/tools/shell-command/safe-copy.sh  $BASE_PATH/ShellSpace/tools/git/include-config ~/.include-config
     add_string_in_file bash-init.sh ~/.bashrc "source ~/.bash-init.sh"
 }
 
