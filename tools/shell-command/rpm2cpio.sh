@@ -8,7 +8,11 @@ then
     exit 76
 fi
 
-mkdir ${1%.rpm}
+#mkdir ${1%.rpm}
+BASE_NAME=`basename $1`
+mkdir ${BASE_NAME%.rpm}
 
-cd ${1%.rpm}
-rpm2cpio ../$1 | cpio -idv
+ABSOLUTE_PATH=`readlink -f $1`
+cd ${BASE_NAME%.rpm}
+
+rpm2cpio $ABSOLUTE_PATH | cpio -idv

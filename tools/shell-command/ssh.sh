@@ -6,7 +6,7 @@ spawn ssh erv@$ip
 
 expect {
  "*(yes/no)?" { send "yes\r"; exp_continue}
- "*password:" {send "ggsn\r" }
+ "*password:" {send "azhweib_\r" }
  }
 interact
 
