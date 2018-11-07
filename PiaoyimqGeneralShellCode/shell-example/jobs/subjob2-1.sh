@@ -10,6 +10,8 @@ subjob_init $0 $$
 #sleep 5
 
 echo "____$0, pid=$$, ppid=$PPID"
-
-
-./subjob3-1.sh &
+sleep 5
+asfdfdsaf
+#while :; do       #: equal true.
+#    sleep 25
+#done

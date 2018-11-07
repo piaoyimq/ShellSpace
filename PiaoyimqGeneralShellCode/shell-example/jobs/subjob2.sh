@@ -7,10 +7,11 @@ subjob_init $0 $$
 #asfd
 #exit 74
 #sleep 5
-
-echo "____$0, pid=$$, ppid=$PPID"
-exit 0
-asfd
-while :; do       #: equal true.
-    sleep 5
-done
+sleep 5
+./subjob2-1.sh&
+./subjob2-2.sh&
+#echo "____$0, pid=$$, ppid=$PPID"
+#while :; do       #: equal true.
+#    sleep 3
+#    asfd
+#done

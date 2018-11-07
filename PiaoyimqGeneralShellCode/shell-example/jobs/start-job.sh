@@ -27,16 +27,30 @@ export JOBS_INFO_FIFO=$JOB_TEMP/$$.inf
 
 kill_process()
 {
+    set -x
+    i=0
+    for ((;i<3;))  # Read the latest process id if exists, mainly handle Ctrl + C
+    do
+         echo "________for read$i, current pid=_\"${CURRENT_PIDS[@]}\"_"
+          
+         read -t 1 job_info < $JOBS_INFO_FIFO || i=`expr $i + 1` # if read emtpy, then i++
+         echo "____job_info=$job_info"
+         local wrods=`echo $job_info|wc -w`
+         if [[ "$job_info" == "process_id"*  && $wrods -eq 3 ]]
+         then
+             local pid=`echo "$job_info"|cut -d ' ' -f 3`
+             CURRENT_PIDS=(${CURRENT_PIDS[@]} $pid)  #append pid
+         fi
+     done
+
+    echo "________last read1, current pid=_\"${CURRENT_PIDS[@]}\"_"
+    
     if [ ${#CURRENT_PIDS[@]} -ne 0 ]
     then
-        read -t 1 job_info < $JOBS_INFO_FIFO # Read the latest process id if exists
-        local wrods=`echo $job_info|wc -w`
-        if [[ "$job_info" == "process_id"*  && $wrods -eq 3 ]]
-        then
-            local pid=`echo "$job_info"|cut -d ' ' -f 3`
-            CURRENT_PIDS=(${CURRENT_PIDS[@]} $pid)  #append pid
-        fi
-        kill -9 ${CURRENT_PIDS[@]}
+        
+        echo "________last read2, current pid=_\"${CURRENT_PIDS[@]}\"_"
+        
+        kill -9 ${CURRENT_PIDS[@]} || true
         unset CURRENT_PIDS
     fi
     
@@ -99,26 +113,15 @@ wait_subjob()
     while true
     do
         echo "____read:"
-        if [ $retry_times -eq 0 ]
-        then
-            read job_info < $JOBS_INFO_FIFO
-        else
-            read -t 2 job_info < $JOBS_INFO_FIFO || true
-        fi
+        read -t 1 job_info < $JOBS_INFO_FIFO || true
         
         local wrods=`echo $job_info|wc -w`
         if [[ "$job_info" == "process_id"*  && $wrods -eq 3 ]]
         then
-        
-            if [ $retry_times -gt 0 ]
-            then
-                #retry_times=`expr $retry_times - 1`
-                retry_times=0
-            fi
-            
+            retry_times=0
             local pid=`echo "$job_info"|cut -d ' ' -f 3`
             CURRENT_PIDS=(${CURRENT_PIDS[@]} $pid)  #append pid
-            echo "________after append $pid, current pid=${CURRENT_PIDS[@]}"
+            echo "________after append $pid, current pid=_\"${CURRENT_PIDS[@]}\"_"
         elif [[ "$job_info" == "exit_code"* && $wrods -eq 4 ]]
         then
             local job_name=`echo "$job_info"|cut -d ' ' -f 2`
@@ -128,39 +131,32 @@ wait_subjob()
             if [ $exit_code -ne 0 ] 
             then
                 remove_pid $job_pid
-                echo "________after remove1 $job_pid, current pid=${CURRENT_PIDS[@]}"
+                echo "________after remove1 $job_pid, current pid=_\"${CURRENT_PIDS[@]}\"_"
                 err_exit $exit_code "$job_name exit with $exit_code"  
             else
                 notice "$job_name excuted successfully"
                 remove_pid $job_pid
-                echo "________after remove2 $job_pid, current pid=${CURRENT_PIDS[@]}"
-                len=${#CURRENT_PIDS[@]}
-                
-                if [ $len -eq 0 ]
-                then
-                    retry_times=`expr $retry_times + 1`
-                    if [ $retry_times -eq 3 ]
-                    then
-                        notice "All jobs excuted successfully"
-                        break
-                    fi
-                fi
+                echo "________after remove2 $job_pid, current pid=_\"${CURRENT_PIDS[@]}\"_"
             fi
         elif [ -z "$job_info" ]
         then
-            retry_times=`expr $retry_times + 1`
             len=${#CURRENT_PIDS[@]}
             
-            if [[ $retry_times -eq 3 && $len -eq 0 ]]
+            if [ $len -eq 0 ]
             then
-                notice "All jobs excuted successfully"
-                break
+                retry_times=`expr $retry_times + 1`
+                if [ $retry_times -eq 3 ]
+                then
+                    notice "All jobs excuted successfully"
+                    break
+                fi
             fi
         else
             ###TODO: if format is wrong, maybe some sub-process will not killed (zhuweibo)
             err_exit 74 "$JOBS_INFO_FIFO format is wrong"         
         fi
-        echo "____current_pids=${CURRENT_PIDS[@]}"
+        
+        echo "____current_pids=_\"${CURRENT_PIDS[@]}\"_"
     done
 }
 
