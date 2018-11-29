@@ -3,7 +3,7 @@ set -x
 
 unalias -a
 
-source /home/azhweib/repo/em-360-2/common/bash/basic-function.sh
+source /home/azhweib/repo/em-360-2/common/bash/src/basic-function.sh
 
 
 WAIT_JOB_ENABLE=false
@@ -31,16 +31,16 @@ kill_process()
     i=0
     for ((;i<3;))  # Read the latest process id if exists, mainly handle Ctrl + C
     do
-         echo "________for read$i, current pid=_\"${CURRENT_PIDS[@]}\"_"
-          
-         read -t 1 job_info < $JOBS_INFO_FIFO || i=`expr $i + 1` # if read emtpy, then i++
-         echo "____job_info=$job_info"
-         local wrods=`echo $job_info|wc -w`
-         if [[ "$job_info" == "process_id"*  && $wrods -eq 3 ]]
-         then
-             local pid=`echo "$job_info"|cut -d ' ' -f 3`
-             CURRENT_PIDS=(${CURRENT_PIDS[@]} $pid)  #append pid
-         fi
+        echo "________for read$i, current pid=_\"${CURRENT_PIDS[@]}\"_"
+      
+        read -t 1 job_info < $JOBS_INFO_FIFO || i=`expr $i + 1` # if read emtpy, then i++
+        echo "____job_info=$job_info"
+        local wrods=`echo $job_info|wc -w`
+        if [[ "$job_info" == "process_id"*  && $wrods -eq 3 ]]
+        then
+        local pid=`echo "$job_info"|cut -d ' ' -f 3`
+        CURRENT_PIDS=(${CURRENT_PIDS[@]} $pid)  #append pid
+        fi
      done
 
     echo "________last read1, current pid=_\"${CURRENT_PIDS[@]}\"_"
@@ -58,8 +58,6 @@ kill_process()
     then
         kill_jobs
     fi
-    
-    
 }
 
 
@@ -89,18 +87,56 @@ pre_jobs()
 ###$1: process id($$)
 remove_pid()
 { 
-    echo "________before remove, current pid=_\"${CURRENT_PIDS[@]}\"_"
+    
     local len=${#CURRENT_PIDS[@]}
+    
+    echo "________before remove, current pid=_\"${CURRENT_PIDS[@]}\"_, len=$len, index=${!CURRENT_PIDS[*]}"
     len=`expr $len + 1` #((len++)) #TODO: why +1 (why had empty string in array)
-    for ((i=0;i<$len;i++))
+    #for ((i=0;i<$len;i++))
+    for i in ${!CURRENT_PIDS[*]}
     do
+        if [ -z ${CURRENT_PIDS[$i]} ]
+        then
+            continue
+        fi
+        
         if [[ ${CURRENT_PIDS[$i]} == $1 ]]
         then
             unset CURRENT_PIDS[$i] #remove pid
             break
         fi
     done
-    
+}
+
+
+remove_invalid_pid()
+{ 
+    for i in ${!CURRENT_PIDS[*]}
+    do
+        if [ -z ${CURRENT_PIDS[$i]} ]
+        then
+            continue
+        fi
+        
+        #ret=`ps -ef|awk '{print $2}'|grep ${CURRENT_PIDS[$i]}|grep -vq "grep"` || echo $?
+        if [ ! -e /proc/${CURRENT_PIDS[$i]} ]
+        then
+        
+            date
+            echo "_______$i_________ before remove invalid current pid=_\"${CURRENT_PIDS[@]}\"_"        
+            #if ps -ef|awk '{print $2}'|grep "${CURRENT_PIDS[$i]}"|grep -v "grep"
+            if [ -z $ret ]
+            then
+                echo "____if ret=\"$ret\""
+                echo "________________remove invalid pid=${CURRENT_PIDS[$i]}"
+                unset CURRENT_PIDS[$i] #remove pid
+                echo "________________after remove invalid pid, current pid=_\"${CURRENT_PIDS[@]}\"_"
+            else
+                echo "____else ret=\"$ret\""
+            fi
+        fi
+        
+    done
 }
 
 
@@ -120,26 +156,31 @@ wait_subjob()
         then
             retry_times=0
             local pid=`echo "$job_info"|cut -d ' ' -f 3`
+            date
             CURRENT_PIDS=(${CURRENT_PIDS[@]} $pid)  #append pid
-            echo "________after append $pid, current pid=_\"${CURRENT_PIDS[@]}\"_"
+            echo "________after append_${pid}_, current pid=_\"${CURRENT_PIDS[@]}\"_"
         elif [[ "$job_info" == "exit_code"* && $wrods -eq 4 ]]
         then
             local job_name=`echo "$job_info"|cut -d ' ' -f 2`
             local job_pid=`echo "$job_info"|cut -d ' ' -f 3`
             local exit_code=`echo "$job_info"|cut -d ' ' -f 4`
             
+            remove_pid $job_pid
             if [ $exit_code -ne 0 ] 
             then
-                remove_pid $job_pid
+                
                 echo "________after remove1 $job_pid, current pid=_\"${CURRENT_PIDS[@]}\"_"
                 err_exit $exit_code "$job_name exit with $exit_code"  
             else
                 notice "$job_name excuted successfully"
-                remove_pid $job_pid
                 echo "________after remove2 $job_pid, current pid=_\"${CURRENT_PIDS[@]}\"_"
             fi
         elif [ -z "$job_info" ]
         then
+            
+            #sleep 1
+            remove_invalid_pid
+            
             len=${#CURRENT_PIDS[@]}
             
             if [ $len -eq 0 ]
@@ -172,11 +213,33 @@ subjob_init()
     echo "process_id $JOB_NAME $JOB_PID" > $JOBS_INFO_FIFO
 }
 
+excute_cmd()
+{ 
+    subjob_init "$1" $$
+    echo "____job_name=\"$1\", pid=$$"
+    source "$1"
+}
 
+export -f excute_cmd
+###$1: job bin
 start_job()
 {
-    $1&
+    bash -c "excute_cmd \"$1\"" &
 }
 
 
 export -f subjob_init
+export -f start_job
+
+#CURRENT_PIDS=(4 123 456 789)
+#len=${#CURRENT_PIDS[@]}
+#    
+#echo "________before remove, current pid=_\"${CURRENT_PIDS[@]}\"_, len=$len, index=${!CURRENT_PIDS[*]}"
+##remove_pid 123
+#unset CURRENT_PIDS[2]
+#len=${#CURRENT_PIDS[@]}
+#    
+#echo "________before remove, current pid=_\"${CURRENT_PIDS[@]}\"_, len=$len, index=${!CURRENT_PIDS[*]}"
+#len=${#CURRENT_PIDS[@]}
+#    
+#echo "________before remove, current pid=_\"${CURRENT_PIDS[@]}\"_, len=$len, index=${!CURRENT_PIDS[*]}"

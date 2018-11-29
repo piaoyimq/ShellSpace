@@ -8,7 +8,7 @@ fi
 
 
 set -x
-grep -w "$2" $1 -r
+grep -w "$2" $1 -r|grep -vP '\.git'
 set +x
 echo -en "\033[32mDo you want to replace?(y/n): \033[0m"
 read variable

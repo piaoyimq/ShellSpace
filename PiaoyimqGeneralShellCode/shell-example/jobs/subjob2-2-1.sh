@@ -1,7 +1,7 @@
 #!/bin/bash -e
 set -x
 
-subjob_init $0 $$
+#subjob_init $0 $$
 
 #echo "forever: PID of this script: $$"
 #echo "forever: PPID of this script: $PPID"
@@ -10,7 +10,7 @@ subjob_init $0 $$
 #sleep 5
 
 echo "____$0, pid=$$, ppid=$PPID"
-sleep 25
+sleep 30
 #while :; do       #: equal true.
 #    sleep 25
 #done
