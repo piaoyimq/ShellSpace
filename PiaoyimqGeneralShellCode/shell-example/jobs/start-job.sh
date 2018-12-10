@@ -1,7 +1,20 @@
 #!/bin/bash -e
+
 set -x
 
-unalias -a
+###Usage exmaple:
+###pre_jobs "$0" "$$"
+###
+###start_job ./subjob1.sh
+###start_job ./subjob2.sh
+###start_job ./subjob3.sh
+###start_job ./subjob4.sh
+###
+###wait_subjob
+###
+
+
+
 
 source /home/azhweib/repo/em-360-2/common/bash/src/basic-function.sh
 
@@ -61,9 +74,13 @@ kill_process()
 }
 
 
+###one group of processes only invoke this function once before start_job function
 ###$1: process name($0)
+###$2: process id($$)
 pre_jobs()
 { 
+    subjob_init "$1" $$
+
     JOB_NAME=$1
     trap "" HUP
     trap 'exit_code=$?; \
@@ -87,7 +104,6 @@ pre_jobs()
 ###$1: process id($$)
 remove_pid()
 { 
-    
     local len=${#CURRENT_PIDS[@]}
     
     echo "________before remove, current pid=_\"${CURRENT_PIDS[@]}\"_, len=$len, index=${!CURRENT_PIDS[*]}"
@@ -213,6 +229,7 @@ subjob_init()
     echo "process_id $JOB_NAME $JOB_PID" > $JOBS_INFO_FIFO
 }
 
+
 excute_cmd()
 { 
     subjob_init "$1" $$
@@ -220,7 +237,7 @@ excute_cmd()
     source "$1"
 }
 
-export -f excute_cmd
+
 ###$1: job bin
 start_job()
 {
@@ -228,18 +245,7 @@ start_job()
 }
 
 
+export -f excute_cmd
 export -f subjob_init
 export -f start_job
 
-#CURRENT_PIDS=(4 123 456 789)
-#len=${#CURRENT_PIDS[@]}
-#    
-#echo "________before remove, current pid=_\"${CURRENT_PIDS[@]}\"_, len=$len, index=${!CURRENT_PIDS[*]}"
-##remove_pid 123
-#unset CURRENT_PIDS[2]
-#len=${#CURRENT_PIDS[@]}
-#    
-#echo "________before remove, current pid=_\"${CURRENT_PIDS[@]}\"_, len=$len, index=${!CURRENT_PIDS[*]}"
-#len=${#CURRENT_PIDS[@]}
-#    
-#echo "________before remove, current pid=_\"${CURRENT_PIDS[@]}\"_, len=$len, index=${!CURRENT_PIDS[*]}"
