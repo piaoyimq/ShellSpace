@@ -16,7 +16,10 @@ set -x
 
 
 
-source /home/azhweib/repo/em-360-2/common/bash/src/basic-function.sh
+source /home/azhweib/repo/em-360/common/bash/src/basic-function.sh
+export -f info_log
+export -f notice_log
+export -f err_log
 
 
 WAIT_JOB_ENABLE=false
@@ -33,6 +36,12 @@ export JOBS_INFO_FIFO=$JOB_TEMP/$$.inf
 ###exit_code job_name2 pid2 3
 ###process_id job_name1 pid1
 ###process_id job_name2 pid2
+
+if [ -z $JOBS_LOG_FILE ]
+then
+    base_name=$(basename $0)
+    export JOBS_LOG_FILE="/proj/public/.tmp/em360/logs/$base_name.log"
+fi
 
 
 
@@ -87,12 +96,12 @@ pre_jobs()
           kill_process; \
           rm -rf $JOBS_INFO_FIFO; \
           if [ $exit_code -ne 0 ]; \
-          then err_exit $exit_code "job: $JOB_NAME exit with $exit_code"; \
+          then err_log "Job $JOB_NAME is failed, exit with $exit_code. Aborting ..."; exit $exit_code; \
           else exit 0; \
           fi;' EXIT
     
     trap 'kill_process; \
-          err_exit 74 "job: $JOB_NAME receive INT or TERM signal"' INT TERM
+          err_log "Job $JOB_NAME receive INT or TERM signal. Aborting ..."; exit 74' INT TERM
     
     mkdir -p $JOB_TEMP
     rm -rf $JOBS_INFO_FIFO
@@ -166,7 +175,7 @@ wait_subjob()
     do
         echo "____read:"
         read -t 1 job_info < $JOBS_INFO_FIFO || true
-        
+        echo "________job_info:$job_info"
         local wrods=`echo $job_info|wc -w`
         if [[ "$job_info" == "process_id"*  && $wrods -eq 3 ]]
         then
@@ -185,11 +194,14 @@ wait_subjob()
             if [ $exit_code -ne 0 ] 
             then
                 
-                echo "________after remove1 $job_pid, current pid=_\"${CURRENT_PIDS[@]}\"_"
-                err_exit $exit_code "$job_name exit with $exit_code"  
+                #echo "________after remove1 $job_pid, current pid=_\"${CURRENT_PIDS[@]}\"_"
+                #err_exit $exit_code "$job_name exit with $exit_code"
+                err_log "Job $job_name is failed, exit with $exit_code. Aborting ..."
+                exit 74
             else
-                notice "$job_name excuted successfully"
-                echo "________after remove2 $job_pid, current pid=_\"${CURRENT_PIDS[@]}\"_"
+                :
+                #notice "$job_name excuted successfully"
+                #echo "________after remove2 $job_pid, current pid=_\"${CURRENT_PIDS[@]}\"_"
             fi
         elif [ -z "$job_info" ]
         then
@@ -204,13 +216,16 @@ wait_subjob()
                 retry_times=`expr $retry_times + 1`
                 if [ $retry_times -eq 3 ]
                 then
-                    notice "All jobs excuted successfully"
+                    #notice "All jobs excuted successfully"
+                    notice_log "All jobs are successful"
                     break
                 fi
             fi
         else
             ###TODO: if format is wrong, maybe some sub-process will not killed (zhuweibo)
-            err_exit 74 "$JOBS_INFO_FIFO format is wrong"         
+            #err_exit 74 "$JOBS_INFO_FIFO format is wrong"
+            err_log "$JOBS_INFO_FIFO format is wrong"
+            exit 74
         fi
         
         echo "____current_pids=_\"${CURRENT_PIDS[@]}\"_"
@@ -232,16 +247,30 @@ subjob_init()
 
 excute_cmd()
 { 
+    local start
+    local now
+    local time_diff
+    
     subjob_init "$1" $$
     echo "____job_name=\"$1\", pid=$$"
+    
+    echo "_______________test 1"    
+    info_log "Start job $1, log file is $2"
+    echo "_______________test 2"
+    
+    start=$(date "+%s")
     source "$1"
+    now=$(date "+%s")
+    time_diff=$((now-start))
+       
+    notice_log "Job \"$1\" is successful in \"${time_diff}s\""
 }
 
 
 ###$1: job bin
 start_job()
 {
-    bash -c "excute_cmd \"$1\"" &
+    bash -c "excute_cmd \"$1\" \"$JOBS_LOG_FILE\"" &
 }
 
 
