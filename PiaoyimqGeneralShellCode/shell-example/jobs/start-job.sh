@@ -17,9 +17,15 @@ set -x
 
 
 source /home/azhweib/repo/em-360/common/bash/src/basic-function.sh
+
+export -f excute_cmd_with_root
 export -f info_log
 export -f notice_log
 export -f err_log
+
+export -f info
+export -f notice
+export -f error
 
 
 WAIT_JOB_ENABLE=false
@@ -37,40 +43,32 @@ export JOBS_INFO_FIFO=$JOB_TEMP/$$.inf
 ###process_id job_name1 pid1
 ###process_id job_name2 pid2
 
-if [ -z $JOBS_LOG_FILE ]
+if [ -z $SUBJOBS_STATUS_LOG ]
 then
-    base_name=$(basename $0)
-    export JOBS_LOG_FILE="/proj/public/.tmp/em360/logs/$base_name.log"
+    err_exit 74 "Parent process should export SUBJOBS_STATUS_LOG variable"
 fi
-
 
 
         
 
 kill_process()
 {
-    set -x
     i=0
+    local wrods
+    local pid
     for ((;i<3;))  # Read the latest process id if exists, mainly handle Ctrl + C
     do
-        echo "________for read$i, current pid=_\"${CURRENT_PIDS[@]}\"_"
-      
         read -t 1 job_info < $JOBS_INFO_FIFO || i=`expr $i + 1` # if read emtpy, then i++
-        echo "____job_info=$job_info"
-        local wrods=`echo $job_info|wc -w`
+        wrods=`echo $job_info|wc -w`
         if [[ "$job_info" == "process_id"*  && $wrods -eq 3 ]]
         then
-        local pid=`echo "$job_info"|cut -d ' ' -f 3`
+        pid=`echo "$job_info"|cut -d ' ' -f 3`
         CURRENT_PIDS=(${CURRENT_PIDS[@]} $pid)  #append pid
         fi
      done
-
-    echo "________last read1, current pid=_\"${CURRENT_PIDS[@]}\"_"
     
     if [ ${#CURRENT_PIDS[@]} -ne 0 ]
     then
-        
-        echo "________last read2, current pid=_\"${CURRENT_PIDS[@]}\"_"
         
         kill -9 ${CURRENT_PIDS[@]} || true
         unset CURRENT_PIDS
@@ -87,7 +85,8 @@ kill_process()
 ###$1: process name($0)
 ###$2: process id($$)
 pre_jobs()
-{ 
+{
+    info "log file: $SUBJOBS_STATUS_LOG"
     subjob_init "$1" $$
 
     JOB_NAME=$1
@@ -113,11 +112,9 @@ pre_jobs()
 ###$1: process id($$)
 remove_pid()
 { 
-    local len=${#CURRENT_PIDS[@]}
+    local len
+    len=${#CURRENT_PIDS[@]}
     
-    echo "________before remove, current pid=_\"${CURRENT_PIDS[@]}\"_, len=$len, index=${!CURRENT_PIDS[*]}"
-    len=`expr $len + 1` #((len++)) #TODO: why +1 (why had empty string in array)
-    #for ((i=0;i<$len;i++))
     for i in ${!CURRENT_PIDS[*]}
     do
         if [ -z ${CURRENT_PIDS[$i]} ]
@@ -143,21 +140,11 @@ remove_invalid_pid()
             continue
         fi
         
-        #ret=`ps -ef|awk '{print $2}'|grep ${CURRENT_PIDS[$i]}|grep -vq "grep"` || echo $?
         if [ ! -e /proc/${CURRENT_PIDS[$i]} ]
         then
-        
-            date
-            echo "_______$i_________ before remove invalid current pid=_\"${CURRENT_PIDS[@]}\"_"        
-            #if ps -ef|awk '{print $2}'|grep "${CURRENT_PIDS[$i]}"|grep -v "grep"
             if [ -z $ret ]
             then
-                echo "____if ret=\"$ret\""
-                echo "________________remove invalid pid=${CURRENT_PIDS[$i]}"
                 unset CURRENT_PIDS[$i] #remove pid
-                echo "________________after remove invalid pid, current pid=_\"${CURRENT_PIDS[@]}\"_"
-            else
-                echo "____else ret=\"$ret\""
             fi
         fi
         
@@ -170,43 +157,39 @@ wait_subjob()
 {
     local exit_pids=""
     local retry_times=0  # Handle when ${#CURRENT_PIDS[@]} is 0, retry read JOBS_INFO_FIFO, double check if start new process
+    local wrods
+    
     WAIT_JOB_ENABLE=true
     while true
     do
-        echo "____read:"
         read -t 1 job_info < $JOBS_INFO_FIFO || true
-        echo "________job_info:$job_info"
-        local wrods=`echo $job_info|wc -w`
+        wrods=`echo $job_info|wc -w`
         if [[ "$job_info" == "process_id"*  && $wrods -eq 3 ]]
         then
             retry_times=0
-            local pid=`echo "$job_info"|cut -d ' ' -f 3`
-            date
+            local pid
+            pid=`echo "$job_info"|cut -d ' ' -f 3`
             CURRENT_PIDS=(${CURRENT_PIDS[@]} $pid)  #append pid
-            echo "________after append_${pid}_, current pid=_\"${CURRENT_PIDS[@]}\"_"
         elif [[ "$job_info" == "exit_code"* && $wrods -eq 4 ]]
         then
-            local job_name=`echo "$job_info"|cut -d ' ' -f 2`
-            local job_pid=`echo "$job_info"|cut -d ' ' -f 3`
-            local exit_code=`echo "$job_info"|cut -d ' ' -f 4`
+            local job_name
+            local job_pid
+            local exit_code
+            
+            job_name=`echo "$job_info"|cut -d ' ' -f 2`
+            job_pid=`echo "$job_info"|cut -d ' ' -f 3`
+            exit_code=`echo "$job_info"|cut -d ' ' -f 4`
             
             remove_pid $job_pid
             if [ $exit_code -ne 0 ] 
             then
-                
-                #echo "________after remove1 $job_pid, current pid=_\"${CURRENT_PIDS[@]}\"_"
-                #err_exit $exit_code "$job_name exit with $exit_code"
                 err_log "Job $job_name is failed, exit with $exit_code. Aborting ..."
                 exit 74
             else
-                :
-                #notice "$job_name excuted successfully"
-                #echo "________after remove2 $job_pid, current pid=_\"${CURRENT_PIDS[@]}\"_"
+                : #subjog success
             fi
         elif [ -z "$job_info" ]
         then
-            
-            #sleep 1
             remove_invalid_pid
             
             len=${#CURRENT_PIDS[@]}
@@ -216,19 +199,15 @@ wait_subjob()
                 retry_times=`expr $retry_times + 1`
                 if [ $retry_times -eq 3 ]
                 then
-                    #notice "All jobs excuted successfully"
                     notice_log "All jobs are successful"
                     break
                 fi
             fi
         else
             ###TODO: if format is wrong, maybe some sub-process will not killed (zhuweibo)
-            #err_exit 74 "$JOBS_INFO_FIFO format is wrong"
             err_log "$JOBS_INFO_FIFO format is wrong"
             exit 74
         fi
-        
-        echo "____current_pids=_\"${CURRENT_PIDS[@]}\"_"
     done
 }
 
@@ -252,28 +231,41 @@ excute_cmd()
     local time_diff
     
     subjob_init "$1" $$
-    echo "____job_name=\"$1\", pid=$$"
-    
-    echo "_______________test 1"    
     info_log "Start job $1, log file is $2"
-    echo "_______________test 2"
     
     start=$(date "+%s")
-    source "$1"
+    set -x
+    source "$1" >& "$2"
+    set +x
+    
     now=$(date "+%s")
     time_diff=$((now-start))
-       
-    notice_log "Job \"$1\" is successful in \"${time_diff}s\""
+
+    notice_log "Job \"$1\" is successful in \"${time_diff}s\""    
 }
 
 
 ###$1: job bin
+###$2: log file
 start_job()
 {
-    bash -c "excute_cmd \"$1\" \"$JOBS_LOG_FILE\"" &
+    if [ -z $2 ]
+    then
+        err_log "Could not start job $1 without log file setting"
+        exit 74
+    fi
+    
+    bash -c "excute_cmd \"$1\" \"$2\"" &
 }
 
 
+output_subjobs_status()
+{ 
+    excute_cmd_with_root "true > $SUBJOBS_STATUS_LOG"
+    tail -f  $SUBJOBS_STATUS_LOG &
+}
+
+    
 export -f excute_cmd
 export -f subjob_init
 export -f start_job
